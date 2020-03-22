@@ -41,7 +41,7 @@ const { err, data } = await read({
   filename: 'pkg.json'
 })
 
-if(err) return { err }
+if (err) return { err }
 
 const json = JSON.parse(data)
 ```
@@ -57,7 +57,7 @@ const { err, data } = await write({
   filename: 'my-file.json'
 })
 
-if(err) return { err }
+if (err) return { err }
 
 console.log(data) // '41b30145-501e-0089-636a-00cb08000000'
 ```
