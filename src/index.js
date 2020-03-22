@@ -102,4 +102,91 @@ const write = async ({
   }
 }
 
-module.exports = { read, write }
+//
+// Get the list of contents (files) of a container directory
+// Returns an array of filenames
+//
+const listContainers = async ({
+  account = '',
+  container = '',
+  maxPageSize = 20
+}) => {
+  if (!account) return { err: new Error(ERRORS.missing.account) }
+  if (!container) return { err: new Error(ERRORS.missing.container) }
+
+  try {
+    const blobServiceClient = createBlobServiceClient(account)
+
+    const data = []
+
+    for await (const response of blobServiceClient
+      .listContainers()
+      .byPage({ maxPageSize })) {
+      if (response.containerItems) {
+        for (const container of response.containerItems) {
+          data.push(container)
+        }
+      }
+    } return { data }
+  } catch (err) {
+    return { err }
+  }
+}
+
+//
+// Returns entire list of blob objects as an array
+//
+const listFiles = async ({
+  account = '',
+  container = ''
+}) => {
+  if (!account) return { err: new Error(ERRORS.missing.account) }
+  if (!container) return { err: new Error(ERRORS.missing.container) }
+
+  try {
+    const blobServiceClient = createBlobServiceClient(account)
+    const containerClient = blobServiceClient.getContainerClient(container)
+
+    const data = []
+
+    for await (const blob of containerClient.listBlobsFlat()) {
+      data.push(blob)
+    }
+    return { data }
+  } catch (err) {
+    return { err }
+  }
+}
+
+//
+// Returns entire list of blob objects as an array
+//
+const listFilesByName = async ({
+  account = '',
+  container = ''
+}) => {
+  if (!account) return { err: new Error(ERRORS.missing.account) }
+  if (!container) return { err: new Error(ERRORS.missing.container) }
+
+  try {
+    const blobServiceClient = createBlobServiceClient(account)
+    const containerClient = blobServiceClient.getContainerClient(container)
+
+    const data = []
+
+    for await (const blob of containerClient.listBlobsFlat()) {
+      data.push(blob.name)
+    }
+    return { data }
+  } catch (err) {
+    return { err }
+  }
+}
+
+module.exports = {
+  read,
+  write,
+  listContainers,
+  listFiles,
+  listFilesByName
+}

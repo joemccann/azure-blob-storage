@@ -2,13 +2,52 @@ require('dotenv').config()
 const test = require('tape')
 const pkg = require('../package.json')
 
-const { read, write } = require('../src/')
+const {
+  read,
+  write,
+  listContainers,
+  listFiles,
+  listFilesByName
+} = require('../src/')
 
 const container = process.env.AZURE_STORAGE_CONTAINER
 const account = process.env.BLOB_SERVICE_ACCOUNT_NAME
 
 test('sanity', t => {
   t.ok(true)
+  t.end()
+})
+
+test('pass - list containers', async t => {
+  const { err, data } = await listContainers({
+    account,
+    container
+  })
+  t.ok(!err)
+  t.ok(data)
+  t.ok(Array.isArray(data))
+  t.end()
+})
+
+test('pass - list files', async t => {
+  const { err, data } = await listFiles({
+    account,
+    container
+  })
+  t.ok(!err)
+  t.ok(data)
+  t.ok(Array.isArray(data))
+  t.end()
+})
+
+test('pass - list files by name', async t => {
+  const { err, data } = await listFilesByName({
+    account,
+    container
+  })
+  t.ok(!err)
+  t.ok(data)
+  t.ok(Array.isArray(data))
   t.end()
 })
 
