@@ -45,6 +45,7 @@ test('pass - write blob storage file', async t => {
   })
   t.ok(!err)
   t.ok(data)
+  t.equals(data.length, 36)
   t.end()
 })
 
