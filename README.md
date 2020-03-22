@@ -65,7 +65,7 @@ console.log(data) // '41b30145-501e-0089-636a-00cb08000000'
 ## Tests
 
 > Note: you will need a `.env` file to run the tests and the tests will read
-and write to your Azure Storage account.A
+and write to your Azure Storage account.
 
 ```sh
 npm i -D
