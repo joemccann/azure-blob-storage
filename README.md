@@ -20,7 +20,7 @@ BLOB_SERVICE_ACCOUNT_NAME=XXX
 ```
 
 If you don't know where to obtain these values in Azure, look at
-the [AZURE.md]('/AZURE.MD') document.
+the [AZURE.md](/AZURE.md) document.
 
 And be sure to include the `dotenv` configuration wherever
 you are using this library in your Node app.
