@@ -1,0 +1,37 @@
+{
+  "name": "azure-blob-storage",
+  "version": "1.0.0",
+  "description": "🗳 An opinionated and tiny, read/write library for Azure Blob Storage.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "pretest": "clear && standard .",
+    "test": "node test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joemccann/azure-blog-storage.git"
+  },
+  "keywords": [
+    "azure",
+    "blob",
+    "storage"
+  ],
+  "author": "Joe McCann",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/joemccann/azure-blog-storage/issues"
+  },
+  "homepage": "https://github.com/joemccann/azure-blog-storage#readme",
+  "dependencies": {
+    "@azure/identity": "^1.0.2",
+    "@azure/storage-blob": "^12.1.1",
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
+    "standard": "^14.3.3",
+    "tape": "^4.13.2"
+  }
+}
