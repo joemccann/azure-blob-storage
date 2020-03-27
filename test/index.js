@@ -18,6 +18,21 @@ test('sanity', t => {
   t.end()
 })
 
+test('pass - write file to source folder within the container',
+  async t => {
+    const content = JSON.stringify(pkg)
+    const { err, data } = await write({
+      account,
+      content,
+      container,
+      filename: 'archive/pkg-souce-folder.json'
+    })
+    t.ok(!err)
+    t.ok(data)
+    t.equals(data.length, 36)
+    t.end()
+  })
+
 test('pass - list containers', async t => {
   const { err, data } = await listContainers({
     account,
