@@ -23,18 +23,17 @@ const streamToString = async (readableStream) => {
   })
 }
 
-const createBlobServiceClient = (account) => {
+const getStorageBaseUrl = (account = '') => {
+  return `https://${account}.blob.core.windows.net`
+}
+
+const createBlobServiceClient = (account = '') => {
   //
   // Authenticate and then connect to the Blob Storage
   //
-  const BLOB_SERVICE_ACCOUNT_NAME = account
+  const creds = new DefaultAzureCredential()
 
-  const defaultAzureCredential = new DefaultAzureCredential()
-
-  return new BlobServiceClient(
-  `https://${BLOB_SERVICE_ACCOUNT_NAME}.blob.core.windows.net`,
-  defaultAzureCredential
-  )
+  return new BlobServiceClient(getStorageBaseUrl(account), creds)
 }
 
 //
@@ -62,6 +61,50 @@ const read = async ({
     const data = await streamToString(readableStreamBody)
 
     return { data }
+  } catch (err) {
+    return { err }
+  }
+}
+
+//
+// Move a file from a container to another folder or container
+//
+const move = async ({
+  account = '',
+  folder = '',
+  container = '',
+  filename = ''
+}) => {
+  if (!account) return { err: new Error(ERRORS.missing.account) }
+  if (!container) return { err: new Error(ERRORS.missing.container) }
+  if (!filename) return { err: new Error(ERRORS.missing.filename) }
+
+  try {
+    const blobServiceClient = createBlobServiceClient(account)
+    //
+    // Now, fetch the file from blob storage file
+    //
+    const containerClient = blobServiceClient.getContainerClient(container)
+
+    const destination = [folder, filename].join('/')
+
+    const source = [
+      getStorageBaseUrl(account),
+      container,
+      filename
+    ].join('/')
+
+    const blobClient = containerClient.getBlobClient(destination)
+
+    let copy = null
+    try {
+      copy = await blobClient.syncCopyFromURL(source)
+    } catch (err) {
+      console.error(err)
+      return { err }
+    }
+
+    return { data: copy }
   } catch (err) {
     return { err }
   }
@@ -159,7 +202,7 @@ const listFiles = async ({
 }
 
 //
-// Returns entire list of blob objects as an array
+// Returns entire list of blob filenames as an array
 //
 const listFilesByName = async ({
   account = '',
@@ -184,6 +227,7 @@ const listFilesByName = async ({
 }
 
 module.exports = {
+  move,
   read,
   write,
   listContainers,
