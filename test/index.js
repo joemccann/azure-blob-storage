@@ -3,6 +3,7 @@ const test = require('tape')
 const pkg = require('../package.json')
 
 const {
+  move,
   read,
   write,
   listContainers,
@@ -18,7 +19,23 @@ test('sanity', t => {
   t.end()
 })
 
-test('pass - write file to source folder within the container',
+test('pass - move file to subdirectory within container', async t => {
+  const { err, data } = await move({
+    account,
+    folder: 'archive',
+    container,
+    filename: 'pkg.json'
+  })
+  console.log('\n....................')
+  console.log('data', data)
+  console.log('err', err)
+  t.ok(!err)
+  t.ok(data)
+  t.end()
+})
+
+/*
+test('pass - write file to subdirectory within the container',
   async t => {
     const content = JSON.stringify(pkg)
     const { err, data } = await write({
@@ -117,3 +134,4 @@ test('fail - write blob storage', async t => {
     .includes('The specified container does not exist'))
   t.end()
 })
+*/
