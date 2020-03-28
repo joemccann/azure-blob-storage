@@ -6,6 +6,7 @@ const ERRORS = {
     account: 'Missing `account` parameter.',
     container: 'Missing `container` parameter.',
     content: 'Missing `content` parameter.',
+    destination: 'Missing `destination` parameter.',
     filename: 'Missing `filename` parameter'
   }
 }
@@ -67,11 +68,73 @@ const read = async ({
 }
 
 //
-// Move a file from a container to another folder or container
+// Move a file from a container to another destination within the same
+// container and then delete the original file (destructive).
 //
 const move = async ({
   account = '',
-  folder = '',
+  destination = null,
+  container = '',
+  filename = ''
+}) => {
+  if (!account) return { err: new Error(ERRORS.missing.account) }
+  if (!container) return { err: new Error(ERRORS.missing.container) }
+  if (!filename) return { err: new Error(ERRORS.missing.filename) }
+
+  if (!destination) {
+    return { err: new Error(ERRORS.missing.destination) }
+  }
+  if (Array.isArray(destination) && !destination.length) {
+    return { err: new Error(ERRORS.missing.destination) }
+  }
+
+  const results = []
+  let moved = null
+
+  try {
+    const blobServiceClient = createBlobServiceClient(account)
+    //
+    // Now, fetch the file from blob storage file
+    //
+    const containerClient = blobServiceClient.getContainerClient(container)
+
+    destination = [destination, filename].join('/')
+
+    const source = [
+      getStorageBaseUrl(account),
+      container,
+      filename
+    ].join('/')
+
+    const blobClient = containerClient.getBlobClient(destination)
+
+    moved = await blobClient.syncCopyFromURL(source)
+
+    results.push(moved)
+
+    //
+    // Now delete the file by creating a new blob client for the
+    // original file.
+    //
+    {
+      const { err, data } = await del({ account, container, filename })
+      if (err) return { err }
+      results.push(data)
+    }
+
+    return { data: results }
+  } catch (err) {
+    return { err }
+  }
+}
+
+//
+// Copies a file to a destination folder within the same container.
+// Keeps original file in tact (nondestructive).
+//
+const copy = async ({
+  account = '',
+  destination = '',
   container = '',
   filename = ''
 }) => {
@@ -86,7 +149,7 @@ const move = async ({
     //
     const containerClient = blobServiceClient.getContainerClient(container)
 
-    const destination = [folder, filename].join('/')
+    destination = [destination, filename].join('/')
 
     const source = [
       getStorageBaseUrl(account),
@@ -100,7 +163,6 @@ const move = async ({
     try {
       copy = await blobClient.syncCopyFromURL(source)
     } catch (err) {
-      console.error(err)
       return { err }
     }
 
@@ -140,6 +202,34 @@ const write = async ({
     }
 
     return { data: requestId }
+  } catch (err) {
+    return { err }
+  }
+}
+
+//
+// Delete a blob within a container (destructive).
+//
+const del = async ({
+  account = '',
+  container = '',
+  filename = ''
+}) => {
+  if (!account) return { err: new Error(ERRORS.missing.account) }
+  if (!container) return { err: new Error(ERRORS.missing.container) }
+  if (!filename) return { err: new Error(ERRORS.missing.filename) }
+  let removed = null
+
+  try {
+    const blobServiceClient = createBlobServiceClient(account)
+
+    const containerClient = blobServiceClient.getContainerClient(container)
+
+    const blobClient = containerClient.getBlobClient(filename)
+
+    removed = await blobClient.delete()
+
+    return { data: removed }
   } catch (err) {
     return { err }
   }
@@ -227,10 +317,12 @@ const listFilesByName = async ({
 }
 
 module.exports = {
-  move,
-  read,
-  write,
+  copy,
+  del,
   listContainers,
   listFiles,
-  listFilesByName
+  listFilesByName,
+  move,
+  read,
+  write
 }
