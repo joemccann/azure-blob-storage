@@ -3,8 +3,10 @@ const test = require('tape')
 const pkg = require('../package.json')
 
 const {
-  del,
   copy,
+  createContainer,
+  del,
+  deleteContainer,
   move,
   read,
   write,
@@ -15,9 +17,34 @@ const {
 
 const container = process.env.AZURE_STORAGE_CONTAINER
 const account = process.env.BLOB_SERVICE_ACCOUNT_NAME
+const newContainer = `newcontainer-${new Date().getTime()}`
 
 test('sanity', t => {
   t.ok(true)
+  t.end()
+})
+
+test('pass - create new container', async t => {
+  const { err, data } = await createContainer({
+    account,
+    container: newContainer
+  })
+  const len = (Object.keys(data).length)
+  t.ok(!err)
+  t.ok(data)
+  t.equals(len, 10)
+  t.end()
+})
+
+test('pass - delete new container', async t => {
+  const { err, data } = await deleteContainer({
+    account,
+    container: newContainer
+  })
+  const len = (Object.keys(data).length)
+  t.ok(!err)
+  t.ok(data)
+  t.equals(len, 8)
   t.end()
 })
 
@@ -199,7 +226,8 @@ test('fail - list containers', async t => {
   })
   t.ok(err)
   t.ok(!data)
-  t.equals(err.statusCode, 403)
+  // console.dir(err)
+  t.equals(err.code, 'REQUEST_SEND_ERROR')
   t.end()
 })
 
@@ -210,7 +238,7 @@ test('fail - list files', async t => {
   })
   t.ok(err)
   t.ok(!data)
-  t.equals(err.statusCode, 403)
+  t.equals(err.code, 'REQUEST_SEND_ERROR')
   t.end()
 })
 

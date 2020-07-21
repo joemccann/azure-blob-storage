@@ -267,6 +267,47 @@ const listContainers = async ({
 }
 
 //
+// Creates a new container
+// Returns an object
+//
+const createContainer = async ({
+  account = '',
+  container = ''
+}) => {
+  if (!account) return { err: new Error(ERRORS.missing.account) }
+  if (!container) return { err: new Error(ERRORS.missing.container) }
+
+  try {
+    const blobServiceClient = createBlobServiceClient(account)
+    const containerClient = blobServiceClient.getContainerClient(container)
+    const createContainerResponse = await containerClient.create()
+    return { data: createContainerResponse }
+  } catch (err) {
+    return { err }
+  }
+}
+
+//
+// Creates a new container
+// Returns an object
+//
+const deleteContainer = async ({
+  account = '',
+  container = ''
+}) => {
+  if (!account) return { err: new Error(ERRORS.missing.account) }
+  if (!container) return { err: new Error(ERRORS.missing.container) }
+
+  try {
+    const blobServiceClient = createBlobServiceClient(account)
+    const containerClient = blobServiceClient.getContainerClient(container)
+    const deleteContainerResponse = await containerClient.delete()
+    return { data: deleteContainerResponse }
+  } catch (err) {
+    return { err }
+  }
+}
+//
 // Returns entire list of blob objects as an array
 //
 const listFiles = async ({
@@ -318,7 +359,9 @@ const listFilesByName = async ({
 
 module.exports = {
   copy,
+  createContainer,
   del,
+  deleteContainer,
   listContainers,
   listFiles,
   listFilesByName,
